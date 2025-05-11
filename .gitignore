@@ -1,0 +1,19 @@
+
+# Python
+__pycache__/
+/backend/__pycache__/
+/backend/instance/
+/backend/*.pyc
+
+# Virtual environment
+/backend/venv/
+/backend/env/
+
+# VS Code
+.vscode/
+
+# Environment variables
+**/.env
+
+# Mac/Linux
+.DS_Store
