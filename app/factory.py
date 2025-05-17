@@ -3,7 +3,7 @@ from flask import Flask
 import os
 
 from config import config
-from .extensions import db, migrate
+from .extensions import db, migrate, jwt, redis_client, cors
 from .models import *
 from .api import register_api
 from .manage import register_commands
@@ -12,6 +12,17 @@ def initialize_extensions(app):
     """Initialize Flask extensions."""
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
+    redis_client.init_app(app)
+    cors.init_app(app, resources={
+        r"/api/*": {
+            "origins": app.config['ALLOWED_ORIGINS'],
+            "supports_credentials": True,
+            "methods": ["GET", "POST"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
+
 
 
 def create_app(config_name=os.environ.get('FLASK_ENV','default')):

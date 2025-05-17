@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import Config
 from sqlalchemy import select
 import os
 from app.extensions import db 
@@ -18,7 +17,7 @@ class Visitor(db.Model):
 
     full_name = db.Column(db.String(100), nullable=False)
     dob = db.Column(db.Date, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
+    #age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.Enum('Male', 'Female', 'Other'), nullable=False)
 
     address = db.Column(db.Text, nullable=False)
@@ -43,13 +42,6 @@ class Visitor(db.Model):
     payments = db.relationship('Payment', backref='visitor', lazy=True)
 
     
-    def set_password(self, raw_password):
-        self.password = generate_password_hash(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password_hash(self.password, raw_password)
-
-
 
 class Payment(db.Model):
     __tablename__ = 'payments'
