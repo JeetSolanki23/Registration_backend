@@ -1,5 +1,5 @@
 # ./app/models/user.py
 
-from .visitors import Visitor
+from .visitors import Visitor, Payment
 
-__all__ = ["Visitor"]
+__all__ = ["Visitor", "Payment"]

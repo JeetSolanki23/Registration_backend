@@ -91,3 +91,16 @@ class AuthService:
                 "full_name": visitor.full_name
             }
         }, None
+        
+    @staticmethod
+    def verify_otp(data):
+        visitor = db.get_or_404(Visitor,data.user_id)
+        if visitor:
+            if data.email == "0000":
+                email = True
+                visitor.is_email_verified = True
+            if data.phone == "0000":
+                phone = True
+                visitor.is_phone_verified = True
+            db.session.commit()
+            return (email,phone)

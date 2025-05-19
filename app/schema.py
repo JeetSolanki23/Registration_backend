@@ -25,3 +25,9 @@ class VisitorSignupSchema(BaseModel):
 class VisitorLoginSchema(BaseModel):
     email: EmailStr
     password: constr(max_length=255)
+    
+    
+class VerifyOtpSchema(BaseModel):
+    user_id: constr(min_length=1, max_length=3)
+    phone: constr(min_length=4, max_length=50)
+    email: constr(min_length=4, max_length=50)
