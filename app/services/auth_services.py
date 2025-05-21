@@ -3,13 +3,14 @@ from werkzeug.exceptions import Conflict
 from sqlalchemy import select
 from flask import request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 import uuid
 from datetime import datetime
 from app.extensions import db
 from app.models import *
-from app.utils import hash_password, verify_password
+
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 def allowed_file(filename):
@@ -32,38 +33,39 @@ class AuthService:
     @staticmethod
     def register_visitor(data):
         """ragistor user."""
+        email = data["email"].lower()
+        phone = data["phone_no"]
         with db.session.begin():
             stmt = select(Visitor).where(
-                (Visitor.email == data.email) | 
-                (Visitor.phone == data.phone)
+                (Visitor.email == data['email']) | 
+                (Visitor.phone == data['phone'])
             )
             existing = db.session.execute(stmt).scalars().first()
-            if existing:
-                if existing.email == data.email and existing.phone == data.phone:
-                    raise ValueError("Email and phone number already registered.")
-                elif existing.email == data.email:
-                    raise ValueError("Email already registered.")
-                else:
-                    raise ValueError("Phone number already registered.")
+        if existing:
+            if existing.email == data['email'] and existing.phone == data['phone']:
+                raise ValueError("Email and phone number already registered.")
+            elif existing.email == data['email']:
+                raise ValueError("Email already registered.")
+            else:
+                raise ValueError("Phone number already registered.")
                 
-
+        hashed_password = generate_password_hash(data["password"])
         visitor = Visitor(
-            phone=data.phone,
-            email=data.email,
-            password=hash_password(data.password),
-            full_name=data.full_name,
-            dob=data.dob,
-            #age=data.age,
-            gender=data.gender,
-            address=data.address,
-            city=data.city,
-            state=data.state,
-            country=data.country,
-            pincode=data.pincode,
-            nationality=data.nationality,
+            full_name=data["full_name"],
+            phone=phone,
+            email=email,
+            password=hashed_password,
+            gender=data["gender"],
+            dob=data["dob"],
+            address=data["address"],
+            city=data["city"],
+            state=data["state"],
+            country=data["country"],
+            pincode=data["pincode"],
+            nationality=data["nationality"],
             person_image=AuthService.save_file(request.files.get('person_image')),
-            id_proof_type=data.id_proof_type,
-            id_proof_number=data.id_proof_number,
+            id_proof_type=data["id_proof_type"],
+            id_proof_number=data["id_proof_no"],
             id_proof_photo=AuthService.save_file(request.files.get('id_proof_photo'))
         )
         db.session.add(visitor)
@@ -74,10 +76,10 @@ class AuthService:
     @staticmethod
     def login_visitor(data):
         """Authenticate and log in a user."""
-        stmt = select(Visitor).where(Visitor.email == data.email)
+        stmt = select(Visitor).where(Visitor.email == data['email'].lower())
         visitor = db.session.execute(stmt).scalars().first()
 
-        if not visitor or not verify_password(data.password, visitor.password):
+        if not visitor or not check_password_hash(data['password'], visitor.password):
             return None, "Invalid email or password"
 
         access_token = create_access_token(identity=visitor.id)
@@ -92,15 +94,3 @@ class AuthService:
             }
         }, None
         
-    @staticmethod
-    def verify_otp(data):
-        visitor = db.get_or_404(Visitor,data.user_id)
-        if visitor:
-            if data.email == "0000":
-                email = True
-                visitor.is_email_verified = True
-            if data.phone == "0000":
-                phone = True
-                visitor.is_phone_verified = True
-            db.session.commit()
-            return (email,phone)

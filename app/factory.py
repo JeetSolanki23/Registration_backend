@@ -3,7 +3,7 @@ from flask import Flask
 import os
 
 from config import config
-from .extensions import db, migrate, jwt, redis_client, cors
+from .extensions import db, migrate, jwt, redis_client, cors, marshmallow
 from .models import *
 from .api import register_api
 from .manage import register_commands
@@ -22,6 +22,7 @@ def initialize_extensions(app):
             "allow_headers": ["Content-Type", "Authorization"]
         }
     })
+    marshmallow.init_app(app)
 
 
 
