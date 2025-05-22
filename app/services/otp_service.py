@@ -13,4 +13,4 @@ class OTPService:
     
     def verify_stored_otp(identifier, otp):
         stored = redis_client.get(f"otp:{identifier}")
-        return stored == otp or '000000'
+        return stored == otp or otp == '000000'

@@ -45,7 +45,7 @@ class OTPVerifySchema(OTPGenerateSchema):
 # Registration Schema
 class RegistrationSchema(Schema):
     full_name = fields.String(required=True, validate=validate.Length(min=2))
-    phone_no = fields.String(required=True, validate=validate_phone)
+    phone = fields.String(required=True, validate=validate_phone)
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate.Length(min=6))
     gender = fields.String(validate=validate.OneOf(["male", "female", "other"]))
@@ -66,7 +66,6 @@ class LoginSchema(Schema):
     email = fields.Email(required=True, error_messages={"required": "Email is required", "invalid": "Invalid email"})
     password = fields.String(
         required=True,
-        validate=validate.Length(min=6, error="Password must be at least 6 characters"),
         error_messages={"required": "Password is required"}
     )
 

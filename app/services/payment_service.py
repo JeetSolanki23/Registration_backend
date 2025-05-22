@@ -6,6 +6,7 @@ from app.models import *
 client = razorpay.Client(auth=(current_app.config['RAZORPAY_KEY_ID'], current_app.config['RAZORPAY_KEY_SECRET']))
 
 def create_payment_order(amount=15000, currency="INR"):
+    visitor_id = get_jwt_identity()
     order = client.order.create({
         "amount": amount * 100,  # ₹15000 → 1500000 paise
         "currency": currency,
@@ -16,10 +17,9 @@ def create_payment_order(amount=15000, currency="INR"):
         visitor_id=visitor_id,
         amount=Decimal(str(amount)),
         currency="INR",
-        transaction_id=order["id"],
+        order_id=order["id"],
         payment_method="Razorpay",
-        payment_status="Pending",
-        created_at=datetime.utcnow()
+        payment_status="Pending"
     )
     db.session.add(payment)
     db.session.commit()

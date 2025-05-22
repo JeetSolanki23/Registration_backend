@@ -34,7 +34,6 @@ class AuthService:
     def register_visitor(data):
         """ragistor user."""
         email = data["email"].lower()
-        phone = data["phone_no"]
         with db.session.begin():
             stmt = select(Visitor).where(
                 (Visitor.email == data['email']) | 
@@ -50,13 +49,14 @@ class AuthService:
                 raise ValueError("Phone number already registered.")
                 
         hashed_password = generate_password_hash(data["password"])
+        print(data["password"])
         visitor = Visitor(
             full_name=data["full_name"],
-            phone=phone,
+            phone=data["phone"],
             email=email,
             password=hashed_password,
             gender=data["gender"],
-            dob=data["dob"],
+            dob=datetime.strptime(data["dob"], "%Y-%m-%d").date(),
             address=data["address"],
             city=data["city"],
             state=data["state"],
@@ -78,12 +78,14 @@ class AuthService:
         """Authenticate and log in a user."""
         stmt = select(Visitor).where(Visitor.email == data['email'].lower())
         visitor = db.session.execute(stmt).scalars().first()
+        print(visitor)
+        print(data["password"])
 
-        if not visitor or not check_password_hash(data['password'], visitor.password):
+        if not visitor or not check_password_hash(visitor.password, data['password']):
             return None, "Invalid email or password"
 
-        access_token = create_access_token(identity=visitor.id)
-        refresh_token = create_refresh_token(identity=visitor.id)
+        access_token = create_access_token(identity=str(visitor.id))
+        refresh_token = create_refresh_token(identity=str(visitor.id))
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
