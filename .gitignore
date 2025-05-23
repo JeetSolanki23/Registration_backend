@@ -1,19 +1,51 @@
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
-/backend/__pycache__/
-/backend/instance/
-/backend/*.pyc
+*.py[cod]
+*$py.class
 
-# Virtual environment
-/backend/venv/
-/backend/env/
+# Flask instance and config
+instance/
+.env
+*.env
 
-# VS Code
+# Flask-Migrate
+migrations/
+
+# SQLite and other local DBs
+*.sqlite3
+*.db
+
+# Logs and debug info
+*.log
+
+# IDE/editor folders
 .vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
 
-# Environment variables
-**/.env
-
-# Mac/Linux
+# OS-specific files
 .DS_Store
+Thumbs.db
+
+# Python virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Coverage and test output
+htmlcov/
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# pytest cache
+.cache/

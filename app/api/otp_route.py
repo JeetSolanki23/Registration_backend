@@ -13,13 +13,18 @@ def generate_otp_route():
     schema = OTPGenerateSchema()
     try:
         data = schema.load(json_data)
+        
+        otp = OTPService.generate_otp()
+        OTPService.store_otp(data["identifier"], otp, delivery_method)
+        
     except ValidationError as err:
         return jsonify({"errors": err.messages}), 400
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 409  # conflict for duplicate
     except Exception as err:
         return jsonify({"error": str(err)}), 500
 
-    otp = OTPService.generate_otp()
-    OTPService.store_otp(data["identifier"], otp)
+    
 
     if delivery_method == "sms":
         print("sms send")
@@ -44,7 +49,7 @@ def verify_otp_route():
     except Exception as err:
         return jsonify({"error": str(err)}), 500
 
-    if OTPService.verify_stored_otp(data["identifier"], data["otp"]):
+    if OTPService.verify_stored_otp(data["identifier"], data["otp"], delivery_method):
         return jsonify({"message": "OTP verified successfully."})
     else:
         return jsonify({"error": "Invalid or expired OTP."}), 400

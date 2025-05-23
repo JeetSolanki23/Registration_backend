@@ -33,7 +33,7 @@ class Visitor(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
-    payments = db.relationship('Payment', backref='visitor', lazy=True)
+    payments = db.relationship("Payment", back_populates="visitor", lazy=True)
 
     def __repr__(self):
         return f"<Visitor {self.email}>"

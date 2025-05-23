@@ -92,7 +92,9 @@ class AuthService:
             "visitor": {
                 "id": visitor.id,
                 "email": visitor.email,
-                "full_name": visitor.full_name
+                "full_name": visitor.full_name,
+                "is_email_verified": visitor.is_email_verified,
+                "is_payment_done": visitor.is_payment_done
             }
         }, None
         
