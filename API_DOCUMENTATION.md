@@ -8,7 +8,6 @@ This document provides details for all available API endpoints.
     *   [`POST /api/auth/signup`](#post-authsignup)
     *   [`POST /api/auth/signin`](#post-authsignin)
     *   [`POST /api/auth/refresh`](#post-authrefresh)
-    *   [`GET /api/auth/dashboard`](#get-authdashboard)
 3.  [OTP Endpoints](#otp-endpoints)
     *   [`POST /api/otp/generate-otp`](#post-otpgenerate-otp)
     *   [`POST /api/otp/verify-otp`](#post-otpverify-otp)

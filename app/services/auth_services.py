@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 from datetime import datetime
-from app.extensions import db
+from app.extensions import db, redis_client
 from app.models import *
 
 
