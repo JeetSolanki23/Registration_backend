@@ -11,7 +11,7 @@ def register():
     schema = RegistrationSchema()
     errors = schema.validate(data)
     if errors:
-        return jsonify(errors), 400
+        return jsonify({"error": errors}), 400
     try:
         visitor = AuthService.register_visitor(data)
         return jsonify({
@@ -28,9 +28,8 @@ def register():
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 409  # conflict for duplicate
 
-    """except Exception as e:
+    except Exception as e:
         return jsonify({"error": "Something went wrong"}), 500
-        """
     
 
 

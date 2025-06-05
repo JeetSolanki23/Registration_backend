@@ -47,6 +47,8 @@ class AuthService:
                 raise ValueError("Email already registered.")
             else:
                 raise ValueError("Phone number already registered.")
+        if not redis_client.get(f"phone:{data["phone"]}"):
+            raise ValueError("phone number is not verified")
                 
         hashed_password = generate_password_hash(data["password"])
         print(data["password"])
