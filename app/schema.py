@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validates, ValidationError, validate
+from marshmallow import Schema, fields, validates_schema, ValidationError, validate
 import phonenumbers
 from email_validator import validate_email, EmailNotValidError
 
@@ -23,19 +23,24 @@ class OTPGenerateSchema(Schema):
     type = fields.String(required=True, validate=validate.OneOf(["password_reset", "registration"]))
     delivery_method = fields.String(required=True, validate=validate.OneOf(["sms", "email"]))
 
-    def validate(self, data, **kwargs):
-        delivery_method = data.get("delivery_method")
+    @validates_schema
+    def validate_identifier_based_on_method(self, data, **kwargs):
         identifier = data.get("identifier")
-
-        if not delivery_method or not identifier:
-            raise ValidationError("Both 'identifier' and 'delivery_method' are required.")
+        delivery_method = data.get("delivery_method")
 
         if delivery_method == "sms":
-            validate_phone(identifier)
+            try:
+                number = phonenumbers.parse(identifier, None)
+                if not phonenumbers.is_valid_number(number):
+                    raise ValidationError({"identifier": ["Invalid phone number."]})
+            except phonenumbers.NumberParseException:
+                raise ValidationError({"identifier": ["Invalid phone number."]})
+
         elif delivery_method == "email":
-            validate_email_address(identifier)
-        else:
-            raise ValidationError({"delivery_method": ["Invalid delivery method."]})
+            try:
+                validate_email(identifier)
+            except EmailNotValidError:
+                raise ValidationError({"identifier": ["Invalid email address."]})
 
 
 # OTP Verify Schema inherits generate and adds OTP field

@@ -1,7 +1,7 @@
 # ./app/services/auth_services.py
 from werkzeug.exceptions import Conflict
-from sqlalchemy import select
-from flask import request, jsonify
+from sqlalchemy import select, literal_column, union_all, func
+from flask import request, jsonify, current_app
 from flask_jwt_extended import create_access_token, create_refresh_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -24,7 +24,7 @@ class AuthService:
             filename = secure_filename(file.filename)
             ext = filename.rsplit('.', 1)[1].lower()
             unique_name = f"{uuid.uuid4()}.{ext}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_name)
             file.save(filepath)
             return unique_name
         return None
@@ -34,24 +34,37 @@ class AuthService:
     def register_visitor(data):
         """ragistor user."""
         email = data["email"].lower()
+        phone = data["phone"]
         with db.session.begin():
-            stmt = select(Visitor).where(
-                (Visitor.email == data['email']) | 
-                (Visitor.phone == data['phone'])
-            )
-            existing = db.session.execute(stmt).scalars().first()
+            email_query = select(literal_column("'email'").label("field"))
+            email_query = email_query.where(func.lower(Visitor.email) == email)
+
+            phone_query = select(literal_column("'phone'").label("field"))
+            phone_query = phone_query.where(Visitor.phone == phone)
+
+            union_stmt = union_all(email_query, phone_query)
+
+            existing = db.session.execute(union_stmt).scalars().all()
+            print(existing)
         if existing:
-            if existing.email == data['email'] and existing.phone == data['phone']:
+            if "email" in existing and "phone" in existing:
                 raise ValueError("Email and phone number already registered.")
-            elif existing.email == data['email']:
-                raise ValueError("Email already registered.")
+            elif "email" in existing:
+                 raise ValueError("Email already registered.")
             else:
                 raise ValueError("Phone number already registered.")
-        if not redis_client.get(f"phone:{data["phone"]}"):
+            
+        #     if existing.email == email and existing.phone == phone:
+        #         raise ValueError("Email and phone number already registered.")
+        #     elif existing.email == email:
+        #         raise ValueError("Email already registered.")
+        #     else:
+        #         raise ValueError("Phone number already registered.")
+        if not redis_client.get(f"phone:{phone}"):
             raise ValueError("phone number is not verified")
                 
         hashed_password = generate_password_hash(data["password"])
-        print(data["password"])
+
         visitor = Visitor(
             full_name=data["full_name"],
             phone=data["phone"],
@@ -80,8 +93,6 @@ class AuthService:
         """Authenticate and log in a user."""
         stmt = select(Visitor).where(Visitor.email == data['email'].lower())
         visitor = db.session.execute(stmt).scalars().first()
-        print(visitor)
-        print(data["password"])
 
         if not visitor or not check_password_hash(visitor.password, data['password']):
             return None, "Invalid email or password"

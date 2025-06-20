@@ -28,8 +28,8 @@ def register():
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 409  # conflict for duplicate
 
-    except Exception as e:
-        return jsonify({"error": "Something went wrong"}), 500
+    # except Exception as e:
+    #     return jsonify({"error": "Something went wrong"}), 500
     
 
 
